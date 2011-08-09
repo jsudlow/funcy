@@ -1,0 +1,145 @@
+#!/usr/bin/python
+
+# funcy.py URB visual battle formula designer
+#idea and all core gaming structures: dustin lacewell
+#funcy alpha version started by: Jon Sudlow (2011, Aug)
+import sys
+from PyQt4 import QtGui
+from PyQt4 import QtCore
+import numpy as np
+from PyQt4.Qwt5 import *
+from PyQt4.Qwt5.qplt import *
+class FuncyBaseWindow(QtGui.QMainWindow):
+    def __init__(self, parent=None):
+        QtGui.QMainWindow.__init__(self)
+
+        self.setGeometry(300, 300, 250, 150)
+        self.setWindowTitle('URB- Visual Battle Formula Designer')
+
+        self.setWindowIcon(QtGui.QIcon('web.png'))
+
+        self.setToolTip('This is a <b>funcy_base_window</b> widget')
+        
+        quit = QtGui.QPushButton('Exit Funcy', self)
+        quit.setGeometry(675, 540, 120, 35)
+        quit.setToolTip('Push Exit to close the program. <b>enjoy</b>')
+
+        self.connect(quit, QtCore.SIGNAL('clicked()'),QtGui.qApp, QtCore.SLOT('quit()'))
+        self.statusBar().showMessage('Ready To Begin Design Process')
+
+        exit = QtGui.QAction(QtGui.QIcon('exit.png'),'Exit',self)
+        exit.setShortcut('Ctrl+Q')
+        exit.setStatusTip('Exit application')
+        self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
+        
+        menubar = self.menuBar()
+        file = menubar.addMenu('&File')
+        file.addAction(exit)
+
+        self.toolbar = self.addToolBar('Exit')
+        self.toolbar.addAction(exit)
+        
+        lcd = QtGui.QLCDNumber(self)
+        slider = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+        lcd.move(0,100)
+        slider.move(0,130)
+        self.connect(slider,  QtCore.SIGNAL('valueChanged(int)'), lcd,QtCore.SLOT('display(int)'))
+
+        button1 = QtGui.QPushButton("Button 1", self)
+        button1.move(30, 250)
+
+        button2 = QtGui.QPushButton("Button 2", self)
+        button2.move(150, 250)
+      
+        self.connect(button1, QtCore.SIGNAL('clicked()'), 
+            self.buttonClicked)
+            
+        self.connect(button2, QtCore.SIGNAL('clicked()'), 
+            self.buttonClicked)    
+        self.button = QtGui.QPushButton('Dialog', self)
+        self.button.setFocusPolicy(QtCore.Qt.NoFocus)
+
+        self.button.move(20, 20)
+        self.connect(self.button, QtCore.SIGNAL('clicked()'),self.showDialog)
+        self.setFocus()
+        
+        self.label = QtGui.QLineEdit(self)
+        self.label.move(130, 22)
+
+        color = QtGui.QColor(0, 0, 0) 
+
+        self.button = QtGui.QPushButton('Dialog', self)
+        self.button.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.button.move(420, 20)
+
+        self.connect(self.button, QtCore.SIGNAL('clicked()'), 
+            self.showDialog)
+        self.setFocus()
+
+        self.widget = QtGui.QWidget(self)
+        self.widget.setStyleSheet("QWidget { background-color: %s }" 
+            % color.name())
+
+
+        self.widget.setGeometry(130, 22, 100, 100)
+
+        self.z = 0.000001
+        self.x = np.arange(-2*np.pi, 2*np.pi, self.z)
+        self.p = Plot(
+            Curve(self.x, np.cos(self.x), Pen(Magenta, 2), "cos(x)"),
+            Curve(self.x, np.exp(self.x), Pen(Red), "exp(x)", Y2),
+            Axis(Y2, Log),
+            "PyQwt using Qwt-%s -- http://qwt.sf.net" % QWT_VERSION_STR)
+        
+    def closeEvent(self,event):
+        reply = QtGui.QMessageBox.question(self,'Quit Designing Already?',"Are you sure you want to quit FUNCY?",QtGui.QMessageBox.No,QtGui.QMessageBox.Yes)
+        if reply == QtGui.QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+
+    def center(self):
+        screen = QtGui.QDesktopWidget().screenGeometry()
+        size =  self.geometry()
+        self.move((screen.width()-size.width())/2, (screen.height()-size.height())/2)
+
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Escape:
+            self.close()   
+    def buttonClicked(self):
+      
+        sender = self.sender()
+        self.statusBar().showMessage(sender.text() + ' was pressed')
+        self.z += .5
+        
+        print "Z:"
+        print  self.z
+        print "\n"
+        self.x = np.arange(-2*np.pi, 2*np.pi, self.z)
+        self.p = Plot(
+            Curve(self.x, np.cos(self.x), Pen(Magenta, 2), "cos(x)"),
+            Curve(self.x, np.exp(self.x), Pen(Red), "exp(x)", Y2),
+            Axis(Y2, Log),
+            "PyQwt using Qwt-%s -- http://qwt.sf.net" % QWT_VERSION_STR)
+
+        
+    def showDialog(self):
+        text, ok = QtGui.QInputDialog.getText(self, 'Input Dialog','Enter your name:')
+        
+        if ok:
+            self.label.setText(str(text))
+
+    def showDialog(self):
+      
+        col = QtGui.QColorDialog.getColor()
+
+        if col.isValid():
+            self.widget.setStyleSheet("QWidget { background-color: %s }"
+                % col.name())        
+if __name__ == '__main__':
+    app = QtGui.QApplication(sys.argv) 
+    funcy_base_window  = FuncyBaseWindow()
+    funcy_base_window.resize(800,600)
+    funcy_base_window.center()
+    funcy_base_window.show()
+    sys.exit(app.exec_())

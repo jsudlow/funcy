@@ -1,4 +1,5 @@
 Welcome to the FUNCY battle formula designer
 
-This designer will eventually help us evaluate if a good action or calculation is fair and balanced. Leaning forward.
+Originally using QT and QWT seemed like a good idea. But I discovered it was easier and much more light weight to drive
+a battle formular with matplotlib. This is a very good library that comes with all the tools we need.
 
